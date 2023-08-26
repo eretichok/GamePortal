@@ -5,14 +5,29 @@
 {% endblock title %}
 
 {% block content %}
+<div>
     <h3>{{ post.headline }}</h3>
-    Автор {{ post.author.user.username }}, дата {{ post.date_created|date:'d M Y' }}
+    Автор {{ post.author }}, дата {{ post.create_date|date:'d M Y' }}
 
     <hr>{{ post.text }}<hr>
 
-    <p>Категория <<{{ post.category }}>></p>
+    <p>Категория: {{ post.get_category_display }}</p>
 
 </div>
+<div>
+    {% if responses %}
+    <h2>Комментарии:</h2>
+    {% for response in responses %}
+        <p>{{ response.text }}
+
+
+        </p>
+    {% endfor %}
+    {% else %}
+    <h2>Комментариев нет!</h2>
+    {% endif %}
+</div>
+<div>
     <p>{% if user == post.author  %}
     <form action="edit/">
         <button type="Редактировать публикацию"> Редактировать публикацию</button>
@@ -22,12 +37,15 @@
     </form>
     </p>
     {% endif %}
-
+</div>
+<div>
 <h2>Добавить комментарий</h2>
+{% csrf_token %}
     <form method="post" action="/{{ post.id }}/">
-        <textarea name="content" rows="4" cols="50"></textarea>
+        {% csrf_token %}
+        <textarea name="text" rows="4" cols="50"></textarea>
         <br>
         <input type="submit" value="Отправить сообщение">
     </form>
-
+</div>
 {% endblock content %}

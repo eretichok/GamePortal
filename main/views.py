@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Post, Profile, Response
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from .forms import PostForm
+from .forms import PostForm, ResponseForm
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -18,11 +18,16 @@ class PostsList(ListView):
 
 
 class ActivityList(ListView):
-    model = Post, Response
+    model = Post
     ordering = '-date'
     template_name = 'activity.html'
-    context_object_name = 'posts', 'response'
+    context_object_name = 'posts'
     paginate_by = 5
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['responses'] = Response.objects.filter(post=self.object)
+        return context
 
 
 # Представление одиночной публикации
@@ -31,11 +36,17 @@ class PostDetails(DetailView):
     template_name = 'post_details.html'
     context_object_name = 'post'
 
+    def post(self, request, pk):
+        post = get_object_or_404(Post, id=pk)
+        text = request.POST.get('text')
+        response = Response(post=post, text=text, user=request.user)
+        response.save()
+        return redirect('post_details', pk=post.id)
+
     # Добавляем в контекст инфу - состоит ли пользователь в группе authors
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        print(self.request)
-        # context['responses'] = self.request.user.groups.filter(name='authors').exists()
+        context['responses'] = Response.objects.filter(post=self.object)
         return context
 
 
@@ -67,4 +78,20 @@ class PostDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     permission_required = ('main.delete_post', )
     model = Post
     template_name = 'post_delete.html'
+    success_url = reverse_lazy('posts')
+
+
+# Представление для изменения поста
+class ResponseEdit(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    permission_required = ('main.change_response', )
+    form_class = ResponseForm
+    model = Post
+    template_name = 'response_edit.html'
+
+
+# Представление для удаления поста.
+class ResponseDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    permission_required = ('main.delete_response', )
+    model = Post
+    template_name = 'response_delete.html'
     success_url = reverse_lazy('posts')

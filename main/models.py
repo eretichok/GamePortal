@@ -58,3 +58,6 @@ class Response(models.Model):
     text = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
     is_accept = models.BooleanField(default=False)
+
+    def get_absolute_url(self):
+        return reverse('post_detail', kwargs={'pk': self.post.pk})
