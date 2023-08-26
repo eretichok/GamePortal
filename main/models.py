@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.urls import reverse
 
 
 class Profile(models.Model):
@@ -45,6 +46,10 @@ class Post(models.Model):
     images = models.ImageField(upload_to='media/post_images/', null=True, blank=True)
     video = models.FileField(upload_to='media/post_videos/', null=True, blank=True)
     file = models.FileField(upload_to='media/post_files/', null=True, blank=True)
+
+    # метод возврата адреса только что созданной публикации
+    def get_absolute_url(self):
+        return reverse('post_detail', kwargs={'pk': self.pk})
 
 
 class Response(models.Model):

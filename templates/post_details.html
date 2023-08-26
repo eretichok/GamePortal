@@ -1,0 +1,33 @@
+{% extends 'default.html' %}
+
+{% block title %}
+
+{% endblock title %}
+
+{% block content %}
+    <h3>{{ post.headline }}</h3>
+    Автор {{ post.author.user.username }}, дата {{ post.date_created|date:'d M Y' }}
+
+    <hr>{{ post.text }}<hr>
+
+    <p>Категория <<{{ post.category }}>></p>
+
+</div>
+    <p>{% if user == post.author  %}
+    <form action="edit/">
+        <button type="Редактировать публикацию"> Редактировать публикацию</button>
+    </form>
+    <form action="delete/">
+        <button type="Удалить публикацию"> Удалить публикацию</button>
+    </form>
+    </p>
+    {% endif %}
+
+<h2>Добавить комментарий</h2>
+    <form method="post" action="/{{ post.id }}/">
+        <textarea name="content" rows="4" cols="50"></textarea>
+        <br>
+        <input type="submit" value="Отправить сообщение">
+    </form>
+
+{% endblock content %}
