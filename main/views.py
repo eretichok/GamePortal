@@ -2,11 +2,12 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Post, Profile, Response
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
-from .forms import PostForm, ResponseForm
+from .forms import PostForm, ResponseForm, UserForm, ProfileForm
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from allauth.account.views import SignupView
 
 
 # Представление списка публикаций
@@ -126,26 +127,71 @@ def response_accept_change(request, pk):
     return redirect('post_details', pk=response.post.id)
 
 
-# @login_required
-# def response_refuse(request, pk):
-#     response = Response.objects.get(id=pk)
-#     response.is_accept = False
-#     response.save()
-#     return redirect('post_details', pk=response.post.id)
-
-
 class ProfileView(LoginRequiredMixin, TemplateView):
+    model = User
     template_name = 'profile.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['profile'] = Profile.objects.get(user__id=self.request.user.id)
-        return context
+        try:
+            context['profile'] = Profile.objects.get(user__id=self.request.user.id )
+        finally:
+            return context
 
 
 class ProfileEditView(LoginRequiredMixin, UpdateView):
     model = Profile
     fields = ['username', 'first_name', 'last_name', 'email', 'date_of_birth', 'photo']
     template_name = 'profile_edit.html'
-    pk_url_kwarg = 'id'
+    # pk_url_kwarg = 'id'
     success_url = reverse_lazy('profile')
+
+
+# class CustomSignupView(SignupView):
+#     form_class = CustomSignupForm
+#     template_name = 'custom_signup.html'
+
+# class CustomSignup(SignupView):
+#     template_name = 'custom_signup.html'
+#     form_class = ProfileForm
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         if 'profile_form' not in context:
+#             context['profile_form'] = self.get_profile_form()
+#         return context
+#
+#     def form_valid(self, form):
+#         user_form = self.get_user_form()
+#         if user_form.is_valid() and form.is_valid():
+#             # Обработка валидных форм
+#             return self.form_valid(form)
+#         else:
+#             # Обработка невалидных форм
+#             return self.form_invalid(form)
+#
+#     def get_profile_form(self):
+#         return Profile.objects.get(user=self.request.user)
+
+
+@login_required
+def profile_edit(request):
+    user = request.user
+    profile = Profile.objects.get(user=user)
+
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=user)
+        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            return redirect('profile')
+    else:
+        user_form = UserForm(instance=user)
+        profile_form = ProfileForm(instance=profile)
+
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+    }
+    return render(request, 'profile_edit.html', context)

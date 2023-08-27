@@ -6,7 +6,7 @@ from django.urls import reverse
 
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    date_of_birth = models.DateField(blank=True, null=True)
+    date_of_birth = models.DateField(blank=True)
     photo = models.ImageField(upload_to='media/avatar', blank=True)
 
     def __str__(self):

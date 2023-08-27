@@ -3,7 +3,7 @@ from django.urls import path, include
 from .views import PostsList, PostDetails, UserActivity
 from .views import PostCreate, PostEdit, PostDelete
 from .views import ResponseEdit, ResponseDelete, response_accept_change
-from .views import ProfileView, ProfileEditView
+from .views import ProfileView, profile_edit
 
 
 urlpatterns = [
@@ -16,8 +16,6 @@ urlpatterns = [
     path('response/<int:pk>/edit/', ResponseEdit.as_view(), name='response_edit'),
     path('response/<int:pk>/delete/', ResponseDelete.as_view(), name='response_delete'),
     path('response/<int:pk>/accept_change/', response_accept_change, name='response_accept_change'),
-    # path('response/<int:pk>/refuse/', response_refuse, name='response_refuse'),
     path('profile/', ProfileView.as_view(), name='profile'),
-    path('profile/edit/<int:id>/', ProfileEditView.as_view(), name='profile_edit'),
-
+    path('profile/edit/', profile_edit, name='profile_edit'),
 ]

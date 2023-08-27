@@ -38,10 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    'main',
-
     'django.contrib.sites',
+
+    'main.apps.MainConfig',
+
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -156,6 +156,7 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+
 LOGIN_REDIRECT_URL = '/'
 
-ACCOUNT_FORMS = {'signup': 'main.forms.BasicSignupForm'}
+ACCOUNT_FORMS = {'signup': 'main.forms.CustomSignupForm'}
