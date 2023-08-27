@@ -1,11 +1,18 @@
 {% extends 'default.html' %}
 
 {% block content %}
-<h1>Редактирование комментария к публикации:</h1>
+
+<h1>Редактирование комментария:</h1>
 <hr>
-<form action="" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Save" />
-</form>
+{% if not response.is_accept %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Save" />
+    </form>
+{% else %}
+    <p>Вы не можете редактировать свой комментарий, т.к. автор объявления принял Ваше предложение.<br>
+    Для редактирования комментария, обратитесь к администратору или попросите автора объявления
+    отменить принятие Вашего предложения.</p>
+{% endif %}
 {% endblock content %}

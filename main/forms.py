@@ -36,11 +36,11 @@ class ProfileEditForm(forms.ModelForm):
 
 class ResponseForm(forms.ModelForm):
     text = forms.CharField(min_length=10, label='Текст комментария', widget=forms.Textarea)
-    is_accept = forms.BooleanField(label='Предложение принято автором:')
+    # is_accept = forms.BooleanField(label='Предложение принято автором:')
 
     class Meta:
         model = Response
-        fields = ('text', 'is_accept')
+        fields = ('text',)
 
 
 class BasicSignupForm(SignupForm):

@@ -43,6 +43,7 @@ class Post(models.Model):
     text = models.TextField()
     create_date = models.DateTimeField(auto_now_add=True)
     edit_date = models.DateTimeField
+    responses_sum = models.SmallIntegerField(default=0)
     images = models.ImageField(upload_to='media/post_images/', null=True, blank=True)
     video = models.FileField(upload_to='media/post_videos/', null=True, blank=True)
     file = models.FileField(upload_to='media/post_files/', null=True, blank=True)

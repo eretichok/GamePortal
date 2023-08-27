@@ -1,12 +1,20 @@
 {% extends 'default.html' %}
 
 {% block content %}
+
 <h1>Удаление объявления</h1>
 <hr>
-<form action="" method="post">
-    {% csrf_token %}
-    <p>Удаляем комментарий?</p>
-    <p>{{ object.text }}"</p>
-    <input type="submit" value="Delete" />
-</form>
+{% if not response.is_accept %}
+    <form action="" method="post">
+        {% csrf_token %}
+        <p>Удаляем комментарий?</p>
+        <p>{{ object.text }}"</p>
+        <input type="submit" value="Delete" />
+    </form>
+{% else %}
+    <p>Вы не можете удалить свой комментарий, т.к. автор объявления принял Ваше предложение.<br>
+    Для удаления комментария, обратитесь к администратору или попросите автора объявления
+    отменить принятие Вашего предложения.</p>
+{% endif %}
+
 {% endblock content %}

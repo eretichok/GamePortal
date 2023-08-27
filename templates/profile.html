@@ -1,0 +1,18 @@
+{% extends "default.html" %}
+
+{% block content %}
+<h2>Личный кабинет пользователя {{request.user.username}}</h2>
+<div> Имя: {{request.user.first_name}} </div>
+<div> Фамилия: {{request.user.last_name}} </div>
+<div> Электронная почта: {{request.user.email}} </div>
+<div> Дата регистрации: {{request.user.date_joined}} </div>
+
+<div> Дата рождения: {{profile.date_of_birth}} </div>
+<div> Аватар: {{profile.photo}} </div>
+
+
+
+
+<button> <a href="{% url 'profile_edit' user.id %}">Редактировать профиль</a> </button>
+<button> <a href="/accounts/logout/">Выйти</a> </button>
+{% endblock %}

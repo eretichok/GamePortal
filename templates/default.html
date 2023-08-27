@@ -23,6 +23,7 @@
                             <li class="nav-item"><a class="nav-link" href="{% url 'post_create' %}">Разместить объявление</a></li>
                             <li class="nav-item"><a class="nav-link" href="{% url 'user_activity' %}">Ваши объявления и отклики</a></li>
                             <li class="nav-item"><a class="nav-link" href="{% url 'account_logout' %}">Выйти</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">{{ user.username }}</a></li>
                         {% else %}
                             <li class="nav-item"><a class="nav-link" href="{% url 'account_login' %}">Войти</a></li>
                         {% endif %}

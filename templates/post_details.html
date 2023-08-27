@@ -16,36 +16,55 @@
 </div>
 <div>
     {% if responses %}
-    <h2>Комментарии:</h2>
+        <h2>Комментарии:</h2>
     {% for response in responses %}
-        <p>{{ response.text }}
-
-
+        <p>{{ response.text }} Автор: {{ response.user.username }}, дата создания: {{ response.date }}
+            {% if user.is_authenticated %}
+                {% if user == response.user %}
+                    <form action="{% url 'response_edit' response.pk %}">
+                        <button type="Редактировать"> Редактировать</button>
+                    </form>
+                    <form action="{% url 'response_delete' response.pk %}">
+                        <button type="Удалить">Удалить</button>
+                    </form>
+                {% endif %}
+                {% if user == post.author %}
+                    {% if not response.is_accept %}
+                    <form action="{% url 'response_accept_change' response.pk %}">
+                        <button type="Принять предложение"> Принять предложение</button>
+                    </form>
+                    {% else %}
+                    <form action="{% url 'response_accept_change' response.pk %}">
+                        <button type="Отказаться от предложения">Принято, нажмите чтобы отказаться</button>
+                    </form>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
         </p>
     {% endfor %}
     {% else %}
-    <h2>Комментариев нет!</h2>
+        <h2>Комментариев нет!</h2>
     {% endif %}
 </div>
 <div>
-    <p>{% if user == post.author  %}
-    <form action="edit/">
-        <button type="Редактировать публикацию"> Редактировать публикацию</button>
-    </form>
-    <form action="delete/">
-        <button type="Удалить публикацию"> Удалить публикацию</button>
-    </form>
-    </p>
+    {% if user == post.author  %}
+        <form action="edit/">
+            <button type="Редактировать публикацию"> Редактировать публикацию</button>
+        </form>
+        <form action="delete/">
+            <button type="Удалить публикацию"> Удалить публикацию</button>
+        </form>
+    {% else %}
+        {% if user.is_authenticated %}
+            <h2>Добавить комментарий</h2>
+            {% csrf_token %}
+                <form method="post" action="/{{ post.id }}/">
+                    {% csrf_token %}
+                    <textarea name="text" rows="4" cols="50"></textarea>
+                    <br>
+                    <input type="submit" value="Отправить сообщение">
+                </form>
+        {% endif %}
     {% endif %}
-</div>
-<div>
-<h2>Добавить комментарий</h2>
-{% csrf_token %}
-    <form method="post" action="/{{ post.id }}/">
-        {% csrf_token %}
-        <textarea name="text" rows="4" cols="50"></textarea>
-        <br>
-        <input type="submit" value="Отправить сообщение">
-    </form>
 </div>
 {% endblock content %}
