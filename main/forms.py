@@ -3,17 +3,28 @@ from .models import Post, Profile, Response
 from django.contrib.auth.models import User
 from allauth.account.forms import SignupForm
 from django.contrib.auth.models import Group
+from ckeditor_uploader.widgets import CKEditorUploadingWidget
+from ckeditor.widgets import CKEditorWidget
+from multiupload.fields import MultiFileField, MultiMediaField, MultiImageField
 
 
 class PostForm(forms.ModelForm):
     # простые проверки до обращения к базе без переопределения метода clean()
     headline = forms.CharField(min_length=3, label='Заголовок')
-    text = forms.CharField(min_length=10, label='Текст публикации', widget=forms.Textarea)
-    # file_field = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': False, 'required': False}))
+    text = forms.CharField(min_length=10, label='Текст публикации', widget=CKEditorWidget())
+    attachments_file = MultiFileField(label='Файл', min_num=0, max_num=3, max_file_size=1024 * 1024 * 5)
+    attachments_video = MultiMediaField(
+        label='Аудио/видео',
+        min_num=0,
+        max_num=3,
+        max_file_size=1024 * 1024 * 5,
+        media_type='video'  # 'audio', 'video' or 'image'
+    )
+    attachments_image = MultiImageField(label='Картинка', min_num=0, max_num=3, max_file_size=1024 * 1024 * 5)
 
     class Meta:
         model = Post
-        fields = ('headline', 'text', 'category')
+        fields = ('headline', 'text', 'attachments_image', 'attachments_video', 'attachments_file', 'category')
         label = {'category': 'Категория'}
 
 
@@ -26,58 +37,7 @@ class ResponseForm(forms.ModelForm):
         fields = ('text',)
 
 
-# class CustomSignupForm(SignupForm):
-#     date_of_birth = forms.DateField(required=False)
-#     photo = forms.ImageField(required=False)
-#
-#     class Meta:
-#
-#         model = User
-#         fields = ('username', 'first_name', 'last_name', 'email')
-#
-#     def custom_signup(self, request, user):
-#         profile = Profile(user=user,
-#                           date_of_birth=self.cleaned_data['date_of_birth'],
-#                           photo=self.cleaned_data['photo']
-#                           )
-#         profile.save()
-#
-#     def save(self, request):
-#         user = super().save(request)
-#         self.custom_signup(request, user)
-#         return user
-
-# class CustomSignupForm(SignupForm):
-#     email = forms.EmailField(label="Email", required=True)
-#     username = forms.CharField(max_length=30, label="Имя пользователя", required=False)
-#     last_name = forms.CharField(max_length=30, label="Имя", required=False)
-#     last_name = forms.CharField(max_length=30, label="Фамилия", required=False)
-#     date_of_birth = forms.DateField(required=False)
-#     photo = forms.ImageField(required=False)
-#
-#     class Meta:
-#         model = User
-#         fields = ("username",
-#                   "first_name",
-#                   "last_name",
-#                   "email",
-#                   "password1",
-#                   "password2",)
-#
-#     def custom_signup(self, request, user):
-#         profile = Profile(user=user,
-#                           date_of_birth=self.cleaned_data['date_of_birth'],
-#                           photo=self.cleaned_data['photo']
-#                           )
-#         profile.save()
-#
-#     def save(self, request):
-#         user = super(CustomSignupForm, self).save(request)
-#         self.custom_signup(request, user)
-#         return user
-
 class CustomSignupForm(SignupForm):
-
     def save(self, request):
         user = super(CustomSignupForm, self).save(request)
         basic_group = Group.objects.get(name='common')

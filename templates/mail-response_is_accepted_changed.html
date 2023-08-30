@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if response.is_accept %}
+    <title>Ваш комментарий к объявлению принят автором</title>
+    {% else %}
+    <title>Автор объявления отменил принятие Вашего комментария</title>
+    {% endif %}
+    <style>
+    .lowercase {
+        text-transform: lowercase;
+    }
+    </style>
+</head>
+<body>
+    {% if response.is_accept %}
+        <p> Ваш комментарий к объявлению <strong>принят</strong> автором:<p>
+        <p> Пост: {{ post.headline }}<p>
+        <p> Автор поста: {{ post.user.username }}</p>
+        <p> Превью:{{ post.text|truncatechars:30 }}</p>
+        <p> Ваш комментарий:{{ response.text|truncatechars:30 }}</p>
+        <p> Перейти к посту с комментариями можно по <a href="/{{ post.id }}/">ссылке</a>.</p>
+    {% else %}
+        <p> Автор объявления <strong>отменил принятие</strong> Вашего комментария:<p>
+        <p> Пост: {{ post.headline }}<p>
+        <p> Автор поста: {{ post.user.username }}</p>
+        <p> Превью:{{ post.text|truncatechars:30 }}</p>
+        <p> Ваш комментарий:{{ response.text|truncatechars:30 }}</p>
+        <p> Перейти к посту с комментариями можно по <a href="/{{ post.id }}/">ссылке</a>.</p>
+    {% endif %}
+
+</body>
+</html>

@@ -19,3 +19,4 @@ urlpatterns = [
     path('profile/', ProfileView.as_view(), name='profile'),
     path('profile/edit/', profile_edit, name='profile_edit'),
 ]
+

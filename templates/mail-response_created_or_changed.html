@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if is_changed %}
+    <title>Комментарий к Вашему объявлению изменен</title>
+    {% else %}
+    <title>Появился новый комментарий к Вашему объявлению</title>
+    {% endif %}
+    <style>
+    .lowercase {
+        text-transform: lowercase;
+    }
+    </style>
+</head>
+<body>
+    {% if is_changed %}
+         <p> Автор изменил свой комментарий к Вашему объявлению: {{ post.headline }}<p>
+        <p> Автор комментария: {{ response.user.username }}</p>
+        <p> Превью:{{ response.text|truncatechars:30 }}</p>
+        <p> Перейти к комментарию можно по <a href="/{{ post.id }}/">ссылке</a>.</p>
+    {% else %}
+        <p> Появился новый комментарий к Вашему объявлению: {{ post.headline }}<p>
+        <p> Автор комментария: {{ response.user }}</p>
+        <p> Превью:{{ response.text|truncatechars:30 }}</p>
+        <p> Перейти к комментарию можно по <a href="/{{ post.id }}/">ссылке</a>.</p>
+    {% endif %}
+
+</body>
+</html>

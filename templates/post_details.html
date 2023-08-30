@@ -9,7 +9,9 @@
     <h3>{{ post.headline }}</h3>
     Автор {{ post.author }}, дата {{ post.create_date|date:'d M Y' }}
 
-    <hr>{{ post.text }}<hr>
+    <hr>{{ post.text|safe }}<hr>
+
+    <p>Вложенные файлы:: НАДО НАСТРОИТЬ!!!</p>
 
     <p>Категория: {{ post.get_category_display }}</p>
 

@@ -2,11 +2,12 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.urls import reverse
+from ckeditor_uploader.fields import RichTextUploadingField
 
 
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    date_of_birth = models.DateField(blank=True)
+    date_of_birth = models.DateField(null=True)
     photo = models.ImageField(upload_to='media/avatar', blank=True)
 
     def __str__(self):
@@ -40,17 +41,28 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.CharField(max_length=2, choices=CATEGORY_CHOICES)
     headline = models.CharField(max_length=255)
-    text = models.TextField()
+    text = RichTextUploadingField()
     create_date = models.DateTimeField(auto_now_add=True)
     edit_date = models.DateTimeField
     responses_sum = models.SmallIntegerField(default=0)
-    images = models.ImageField(upload_to='media/post_images/', null=True, blank=True)
-    video = models.FileField(upload_to='media/post_videos/', null=True, blank=True)
-    file = models.FileField(upload_to='media/post_files/', null=True, blank=True)
 
     # метод возврата адреса только что созданной публикации
     def get_absolute_url(self):
         return reverse('post_detail', kwargs={'pk': self.pk})
+
+
+class Attachment(models.Model):
+    IMAGE = "IM"
+    VIDEO = "VI"
+    FILE = "FI"
+    TYPE_CHOICES = [
+        (IMAGE, "Картинка"),
+        (VIDEO, "Видео"),
+        (FILE, "Файл"),
+        ]
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='attachments')
+    file = models.FileField(upload_to='uploads/')
+    type = models.CharField(max_length=2, choices=TYPE_CHOICES)
 
 
 class Response(models.Model):
@@ -59,6 +71,7 @@ class Response(models.Model):
     text = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
     is_accept = models.BooleanField(default=False)
+
 
     def get_absolute_url(self):
         return reverse('post_detail', kwargs={'pk': self.post.pk})

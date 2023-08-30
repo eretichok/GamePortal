@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Post, Profile, Response
+from .models import Post, Profile, Response, Attachment
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from .forms import PostForm, ResponseForm, UserForm, ProfileForm
 from django.urls import reverse_lazy
@@ -8,6 +8,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from allauth.account.views import SignupView
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
+from django.conf import settings
 
 
 # Представление списка публикаций
@@ -72,7 +75,17 @@ class PostCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     def form_valid(self, form):
         post = form.save(commit=False)
         post.author = User.objects.get(id=self.request.user.id)
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        attachments_image = self.request.FILES.getlist('attachments_image')
+        attachments_video = self.request.FILES.getlist('attachments_image')
+        attachments_file = self.request.FILES.getlist('attachments_image')
+        for attachment in attachments_image:
+            Attachment.objects.create(post=post, file=attachment, type="IM")
+        for attachment in attachments_video:
+            Attachment.objects.create(post=post, file=attachment, type="VI")
+        for attachment in attachments_file:
+            Attachment.objects.create(post=post, file=attachment, type="FI")
+        return response
 
 
 # Представление для изменения поста
@@ -81,6 +94,11 @@ class PostEdit(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     form_class = PostForm
     model = Post
     template_name = 'post_edit.html'
+
+    def form_valid(self, form):
+        post = form.save(commit=False)
+        post.edit_date = User.objects.get(id=self.request.user.id)
+        return super().form_valid(form)
 
 
 # Представление для удаления поста.
@@ -103,6 +121,25 @@ class ResponseEdit(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         post = response.post
         return reverse_lazy('post_details', kwargs={'pk': post.pk})
 
+    def form_valid(self, form):
+        response = form.save(commit=False)
+        subject = f'Пользователь {response.user.username} изменил свое сообщение к Вашему ' \
+                  f'объявлению "{response.post.headline}"'
+
+        response = response
+        post = response.post
+        email = response.post.author.email
+
+        send_mail(
+            subject=subject,
+            message=render_to_string('mail-response_created_or_changed.html', {'response': response,
+                                                                               'post': post}
+                                     ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email]
+        )
+        return super().form_valid(form)
+
 
 # Представление для удаления поста.
 class ResponseDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
@@ -121,9 +158,23 @@ def response_accept_change(request, pk):
     response = Response.objects.get(id=pk)
     if response.is_accept:
         response.is_accept = False
+        subject = f'Автор объявления {response.post.headline} отменил принятие Вашего предложения/'
     else:
         response.is_accept = True
+        subject = f'Автор объявления {response.post.headline} принял Ваше предложение.'
     response.save()
+
+    post = response.post
+    email = response.user.email
+    message = render_to_string('mail-response_is_accepted_changed.html', {'response': response,
+                                                                          'post': post}
+                               )
+    send_mail(
+        subject=subject,
+        message=message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[email]
+    )
     return redirect('post_details', pk=response.post.id)
 
 

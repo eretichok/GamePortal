@@ -10,3 +10,4 @@ admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Post)
 
 
+
