@@ -2,12 +2,12 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.urls import reverse
-from ckeditor_uploader.fields import RichTextUploadingField
+from django_ckeditor_5.fields import CKEditor5Field
 
 
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    date_of_birth = models.DateField(null=True)
+    date_of_birth = models.DateField(null=True, blank=True)
     photo = models.ImageField(upload_to='media/avatar', blank=True)
 
     def __str__(self):
@@ -41,7 +41,7 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.CharField(max_length=2, choices=CATEGORY_CHOICES)
     headline = models.CharField(max_length=255)
-    text = RichTextUploadingField()
+    text = CKEditor5Field('Text', config_name='extends', blank=True)
     create_date = models.DateTimeField(auto_now_add=True)
     edit_date = models.DateTimeField
     responses_sum = models.SmallIntegerField(default=0)
@@ -52,17 +52,8 @@ class Post(models.Model):
 
 
 class Attachment(models.Model):
-    IMAGE = "IM"
-    VIDEO = "VI"
-    FILE = "FI"
-    TYPE_CHOICES = [
-        (IMAGE, "Картинка"),
-        (VIDEO, "Видео"),
-        (FILE, "Файл"),
-        ]
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='attachments')
     file = models.FileField(upload_to='uploads/')
-    type = models.CharField(max_length=2, choices=TYPE_CHOICES)
 
 
 class Response(models.Model):

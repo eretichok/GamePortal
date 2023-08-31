@@ -76,15 +76,6 @@ class PostCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         post = form.save(commit=False)
         post.author = User.objects.get(id=self.request.user.id)
         response = super().form_valid(form)
-        attachments_image = self.request.FILES.getlist('attachments_image')
-        attachments_video = self.request.FILES.getlist('attachments_image')
-        attachments_file = self.request.FILES.getlist('attachments_image')
-        for attachment in attachments_image:
-            Attachment.objects.create(post=post, file=attachment, type="IM")
-        for attachment in attachments_video:
-            Attachment.objects.create(post=post, file=attachment, type="VI")
-        for attachment in attachments_file:
-            Attachment.objects.create(post=post, file=attachment, type="FI")
         return response
 
 
