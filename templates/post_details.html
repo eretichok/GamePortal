@@ -1,5 +1,5 @@
 {% extends 'default.html' %}
-
+{% load custom_filters %}
 {% block title %}
 
 {% endblock title %}
@@ -9,7 +9,7 @@
     <h3>{{ post.headline }}</h3>
     Автор {{ post.author }}, дата {{ post.create_date|date:'d M Y' }}
 
-    <hr>{{ post.text|safe }}<hr>
+    <hr>{{ post.text|preview_picture|safe }}<hr>
 
     <p>Категория: {{ post.get_category_display }}</p>
 

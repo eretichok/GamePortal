@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-from django_ckeditor_5.fields import CKEditor5Field
+from ckeditor_uploader.fields import RichTextUploadingField
 
 
 class Migration(migrations.Migration):
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('category', models.CharField(choices=[('TA', 'Танки'), ('HE', 'Хилы'), ('DD', 'ДД'), ('TR', 'Торговцы'), ('GM', 'Гилдмастеры'), ('QG', 'Квестгиверы'), ('BS', 'Кузнецы'), ('TN', 'Кожевники'), ('ZE', 'Зельевары'), ('SM', 'Мастера заклинаний')], max_length=2)),
                 ('headline', models.CharField(max_length=255)),
-                ('text', CKEditor5Field('Text', config_name='extends', blank=True)),
+                ('text', RichTextUploadingField('Text', blank=True)),
                 ('create_date', models.DateTimeField(auto_now_add=True)),
                 ('responses_sum', models.SmallIntegerField(default=0)),
                 ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),

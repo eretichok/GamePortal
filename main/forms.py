@@ -3,31 +3,18 @@ from .models import Post, Profile, Response
 from django.contrib.auth.models import User
 from allauth.account.forms import SignupForm
 from django.contrib.auth.models import Group
-from django_ckeditor_5.widgets import CKEditor5Widget
+from ckeditor_uploader.widgets import CKEditorUploadingWidget
 
 
 class PostForm(forms.ModelForm):
     # простые проверки до обращения к базе без переопределения метода clean()
     headline = forms.CharField(min_length=3, label='Заголовок')
-    # text = forms.CharField(min_length=10, label='Текст публикации', widget=CKEditor5Widget())
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control', 'autocomplete': 'off'})
-        self.fields['text'].widget.attrs.update({'class': 'form-control django_ckeditor_5'})
-        self.fields['text'].required = True
-        # self.fields["text"].required = False
+    text = forms.CharField(min_length=10, label='Текст публикации', widget=CKEditorUploadingWidget())
 
     class Meta:
         model = Post
         fields = ('headline', 'text', 'category')
         label = {'category': 'Категория'}
-        widgets = {
-            "text": CKEditor5Widget(
-                attrs={"class": "django_ckeditor_5"}, config_name="comment"
-            )
-        }
 
 
 class ResponseForm(forms.ModelForm):

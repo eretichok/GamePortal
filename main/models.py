@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.urls import reverse
-from django_ckeditor_5.fields import CKEditor5Field
+from ckeditor_uploader.fields import RichTextUploadingField
 
 
 class Profile(models.Model):
@@ -41,7 +41,7 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.CharField(max_length=2, choices=CATEGORY_CHOICES)
     headline = models.CharField(max_length=255)
-    text = CKEditor5Field('Text', config_name='extends', blank=True)
+    text = RichTextUploadingField('Text', blank=True)
     create_date = models.DateTimeField(auto_now_add=True)
     edit_date = models.DateTimeField
     responses_sum = models.SmallIntegerField(default=0)

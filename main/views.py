@@ -91,6 +91,10 @@ class PostEdit(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         post.edit_date = User.objects.get(id=self.request.user.id)
         return super().form_valid(form)
 
+    def get_success_url(self):
+        post = self.get_object()
+        return reverse_lazy('post_details', kwargs={'pk': post.pk})
+
 
 # Представление для удаления поста.
 class PostDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):

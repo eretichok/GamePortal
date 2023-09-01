@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from .models import Post, Response
 from django.core.mail import send_mail
@@ -6,6 +6,8 @@ from django.template.loader import render_to_string
 from django.contrib.auth.models import User
 from django.conf import settings
 from .models import Profile
+import os
+# from .settings import BASE_DIR
 
 
 # после создания user, создается объект profile и прикрепляется к user
@@ -35,3 +37,19 @@ def notify_new_response(sender, instance, created, **kwargs):
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[email]
         )
+
+from pathlib import Path
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+DIR = Path(__file__).parent.parent.parent
+
+@receiver(pre_delete, sender=Post)
+def notify_post_author(sender, instance, using, **kwargs):
+    text = instance.text
+    if 'src="/media/uploads/' in text:
+        for part in text.split():
+            if part.startswith('src="/media/uploads/'):
+                file_path = part[5:-1].replace('/','\\')
+                thumb_file_path = '_thumb.'.join(file_path.split('.'))
+                os.remove(str(DIR)+'\gameportal'+file_path)
+                os.remove(str(DIR)+'\gameportal'+thumb_file_path)
