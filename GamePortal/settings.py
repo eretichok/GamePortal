@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sites',
 
     'main.apps.MainConfig',
+    'django_filters',
+    'django_apscheduler',
 
     'allauth',
     'allauth.account',
@@ -168,14 +170,19 @@ LOGIN_REDIRECT_URL = '/'
 
 ACCOUNT_FORMS = {'signup': 'main.forms.CustomSignupForm'}
 
+# настройки APSCHEDULER
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+APSCHEDULER_RUN_NOW_TIMEOUT = 25
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
-AWS_QUERYSTRING_AUTH = False
-# CKEDITOR_IMAGE_BACKEND = "pillow"
+
+# настройки CKEDITOR
+CKEDITOR_IMAGE_BACKEND = "pillow"
 CKEDITOR_UPLOAD_PATH = "uploads/"
-# CKEDITOR_RESTRICT_BY_DATE = True
-# CKEDITOR_FORCE_JPEG_COMPRESSION = True
-# CKEDITOR_IMAGE_QUALITY = 75
+CKEDITOR_RESTRICT_BY_DATE = True
+CKEDITOR_FORCE_JPEG_COMPRESSION = True
+CKEDITOR_IMAGE_QUALITY = 75
 CKEDITOR_IMAGE_BACKEND = "ckeditor_uploader.backends.PillowBackend"
 CKEDITOR_THUMBNAIL_SIZE = (300, 300)
 CKEDITOR_IMAGE_QUALITY = 40
@@ -185,7 +192,6 @@ CKEDITOR_CONFIGS = {
     'default': {
         'skin': 'moono-lisa',
         # 'skin': 'office2013',
-        # ниже пытаюсь снять ошибку блокировки clipboard uploadimage
         'allowedContent': True,
         'clipboard': {
             'pasteImages': True,
@@ -230,21 +236,13 @@ CKEDITOR_CONFIGS = {
             'autoembed',
             'embedsemantic',
             'autogrow',
-            # 'devtools',
             'widget',
             'lineutils',
             'clipboard',
             'dialog',
             'dialogui',
             'elementspath',
-            # 'exportpdf'
-            # 'uploadwidget',
-            # 'widget',
-            # 'xml',
             'filetools',
-            # 'image',
-            # 'image2',
-            # 'wsc',
         ]),
     }
 }

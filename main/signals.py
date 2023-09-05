@@ -7,7 +7,9 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from .models import Profile
 import os
-# from .settings import BASE_DIR
+from pathlib import Path
+
+DIR = Path(__file__).parent.parent.parent
 
 
 # после создания user, создается объект profile и прикрепляется к user
@@ -38,11 +40,8 @@ def notify_new_response(sender, instance, created, **kwargs):
             recipient_list=[email]
         )
 
-from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-DIR = Path(__file__).parent.parent.parent
-
+# сигнал, удаляющий файлы картинок, если удаляется объявление с встроенными картинками
 @receiver(pre_delete, sender=Post)
 def notify_post_author(sender, instance, using, **kwargs):
     text = instance.text

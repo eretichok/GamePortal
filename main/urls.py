@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from .views import PostsList, PostDetails, UserActivity
+from .views import PostsList, PostDetails, Activity
 from .views import PostCreate, PostEdit, PostDelete
 from .views import ResponseEdit, ResponseDelete, response_accept_change
 from .views import ProfileView, profile_edit
@@ -9,7 +9,7 @@ from .views import ProfileView, profile_edit
 urlpatterns = [
     path('', PostsList.as_view(), name='posts'),
     path('<int:pk>/', PostDetails.as_view(), name='post_details'),
-    path('user_activity/', UserActivity.as_view(), name='user_activity'),
+    path('activity/', Activity.as_view(), name='activity'),
     path('create/', PostCreate.as_view(), name='post_create'),
     path('<int:pk>/edit/', PostEdit.as_view(), name='post_edit'),
     path('<int:pk>/delete/', PostDelete.as_view(), name='post_delete'),

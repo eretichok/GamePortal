@@ -1,5 +1,6 @@
 {% extends "default.html" %}
 
+
 {% block content %}
 <h2>Личный кабинет пользователя {{request.user.username}}</h2>
 <div> Имя: {{request.user.first_name}} </div>
@@ -8,11 +9,10 @@
 <div> Дата регистрации: {{request.user.date_joined}} </div>
 
 <div> Дата рождения: {{profile.date_of_birth}} </div>
-<div> Аватар: {{profile.photo}} </div>
+<div> Аватар: <img height="100" src="/media/{{ profile.photo }}" alt="Avatar"> </div>
 
-
-
-
+<br>
 <button> <a href="{% url 'profile_edit' %}">Редактировать профиль</a> </button>
 <button> <a href="/accounts/logout/">Выйти</a> </button>
 {% endblock %}
+    </body>

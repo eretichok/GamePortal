@@ -10,7 +10,7 @@
         {% load static %}
         <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
     </head>
-    <body>
+    <body background="{% static 'background.jpg' %}">
         <!-- Responsive navbar-->
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container px-lg-5">
@@ -21,9 +21,9 @@
                         <li class="nav-item"><a class="nav-link" href="{% url 'posts' %}">Главная</a></li>
                         {% if user.is_authenticated %}
                             <li class="nav-item"><a class="nav-link" href="{% url 'post_create' %}">Разместить объявление</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'user_activity' %}">Ваши объявления и отклики</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'activity' %}">Отклики</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Профиль: {{ user.username }}</a></li>
                             <li class="nav-item"><a class="nav-link" href="{% url 'account_logout' %}">Выйти</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">{{ user.username }}</a></li>
                         {% else %}
                             <li class="nav-item"><a class="nav-link" href="{% url 'account_login' %}">Войти</a></li>
                         {% endif %}

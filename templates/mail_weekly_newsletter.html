@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Еженедельная подборка новых объявлений</title>
+</head>
+<body>
+    <h5>
+    За прошедшую неделю были опубликованы новые объявления, возможно они Вас заинтересуют:
+    </h5>
+    {% for post in posts %}
+        {% if post.author != user %}
+            <p> <a href="/{{ post.id }}/">
+                "{{ post.headline }}" <br>
+                Автор: {{ post.author.username }}.<br>
+                Написал: {{ post.create_date }}. }}</a>
+            </p>
+        {% endif %}
+    {% endfor %}
+</body>
+</html>

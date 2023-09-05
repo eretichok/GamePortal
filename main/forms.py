@@ -6,8 +6,8 @@ from django.contrib.auth.models import Group
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 
 
+# форма объявления
 class PostForm(forms.ModelForm):
-    # простые проверки до обращения к базе без переопределения метода clean()
     headline = forms.CharField(min_length=3, label='Заголовок')
     text = forms.CharField(min_length=10, label='Текст публикации', widget=CKEditorUploadingWidget())
 
@@ -17,6 +17,7 @@ class PostForm(forms.ModelForm):
         label = {'category': 'Категория'}
 
 
+# форма отклика
 class ResponseForm(forms.ModelForm):
     text = forms.CharField(min_length=10, label='Текст комментария', widget=forms.Textarea)
 
@@ -25,6 +26,7 @@ class ResponseForm(forms.ModelForm):
         fields = ('text',)
 
 
+# форма регистрации с переопределением метода save для занесения зарегистрировавшегося пользователя в группу common
 class CustomSignupForm(SignupForm):
     def save(self, request):
         user = super(CustomSignupForm, self).save(request)
@@ -33,12 +35,14 @@ class CustomSignupForm(SignupForm):
         return user
 
 
+# форма модели user
 class UserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email']
 
 
+# форма модели profile
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile

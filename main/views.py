@@ -1,19 +1,19 @@
 from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Post, Profile, Response, Attachment
+from .models import Post, Profile, Response
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from .forms import PostForm, ResponseForm, UserForm, ProfileForm
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from allauth.account.views import SignupView
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.conf import settings
+from .filters import ResponseFilter
 
 
-# Представление списка публикаций
+# Представление основной страницы - списка объявлений
 class PostsList(ListView):
     model = Post
     ordering = '-create_date'
@@ -22,45 +22,51 @@ class PostsList(ListView):
     paginate_by = 6
 
 
-class UserActivity(LoginRequiredMixin, ListView):
-    model = Post
-    ordering = '-create_date'
-    template_name = 'user_activity.html'
-    context_object_name = 'posts'
+# Представление страницы с откликами на объявления пользователя
+class Activity(LoginRequiredMixin, ListView):
+    model = Response
+    template_name = 'activity.html'
+    context_object_name = 'responses'
     paginate_by = 4
 
+    # фильтрация по объявлениям работает, но не получилось сделать, что бы можно было выбирать
+    # только из своих объявлений - показываются все, но при их выборе, естественно,
+    # отзывы не автору поста не показываются
     def get_queryset(self):
-        return Post.objects.filter(author=self.request.user)
+        queryset = super().get_queryset()
+        self.filterset = ResponseFilter(self.request.GET, queryset)
+        return self.filterset.qs
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user_responses = Response.objects.filter(user=self.request.user)
-        context['posts_with_user_responses'] = Post.objects.filter(id__in=user_responses.values('post__id'))
+        context['filterset'] = self.filterset
+        context['filter'] = ResponseFilter(self.request.GET, queryset=self.get_queryset())
         return context
 
 
-# Представление одиночной публикации
+# Представление одиночного объявления
 class PostDetails(DetailView):
     model = Post
     template_name = 'post_details.html'
     context_object_name = 'post'
 
+    # метод создания отклика на объявление
     def post(self, request, pk):
         post = get_object_or_404(Post, id=pk)
         text = request.POST.get('text')
         response = Response(post=post, text=text, user=request.user)
         response.save()
-        post.responses_sum += 1
         return redirect('post_details', pk=post.id)
 
-    # Добавляем в контекст инфу - состоит ли пользователь в группе authors
+    # Добавляем в контекст отклики на открытое объявление
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['responses'] = Response.objects.filter(post=self.object)
         return context
 
 
-# Представление для создания новости
+# Представление для создания объявления
 class PostCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     permission_required = ('main.add_post', )
     form_class = PostForm
@@ -71,7 +77,7 @@ class PostCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         post = self.object
         return reverse_lazy('post_details', kwargs={'pk': post.pk})
 
-    # добавление в post запрос наименование категории, в зависимости от того, с какого url его отправляли - news
+    # добавление в post запрос user как автора
     def form_valid(self, form):
         post = form.save(commit=False)
         post.author = User.objects.get(id=self.request.user.id)
@@ -79,13 +85,14 @@ class PostCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         return response
 
 
-# Представление для изменения поста
+# Представление для изменения объявления
 class PostEdit(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     permission_required = ('main.change_post', )
     form_class = PostForm
     model = Post
     template_name = 'post_edit.html'
 
+    # метод фиксирует в поле edit_date дату изменения объявления
     def form_valid(self, form):
         post = form.save(commit=False)
         post.edit_date = User.objects.get(id=self.request.user.id)
@@ -96,7 +103,7 @@ class PostEdit(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         return reverse_lazy('post_details', kwargs={'pk': post.pk})
 
 
-# Представление для удаления поста.
+# Представление для удаления объявления
 class PostDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     permission_required = ('main.delete_post', )
     model = Post
@@ -104,7 +111,7 @@ class PostDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     success_url = reverse_lazy('posts')
 
 
-# Представление для изменения поста
+# Представление для изменения отклика
 class ResponseEdit(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     permission_required = ('main.change_response', )
     form_class = ResponseForm
@@ -116,6 +123,7 @@ class ResponseEdit(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         post = response.post
         return reverse_lazy('post_details', kwargs={'pk': post.pk})
 
+    # уведомляем по почте автора объявления, что пользователь изменил отклик на его объявление
     def form_valid(self, form):
         response = form.save(commit=False)
         subject = f'Пользователь {response.user.username} изменил свое сообщение к Вашему ' \
@@ -136,7 +144,7 @@ class ResponseEdit(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-# Представление для удаления поста.
+# Представление для удаления отклика
 class ResponseDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     permission_required = ('main.delete_response', )
     model = Response
@@ -148,6 +156,9 @@ class ResponseDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         return reverse_lazy('post_details', kwargs={'pk': post.pk})
 
 
+# Представление для изменения "принятия отклика" автором объявления.
+# Отправляется уведомление по почте автору отклика,
+# о том что автор объявления принял или отказался от принятия его отклика
 @login_required
 def response_accept_change(request, pk):
     response = Response.objects.get(id=pk)
@@ -173,6 +184,7 @@ def response_accept_change(request, pk):
     return redirect('post_details', pk=response.post.id)
 
 
+# Представление профиля пользователя
 class ProfileView(LoginRequiredMixin, TemplateView):
     model = User
     template_name = 'profile.html'
@@ -185,51 +197,20 @@ class ProfileView(LoginRequiredMixin, TemplateView):
             return context
 
 
-class ProfileEditView(LoginRequiredMixin, UpdateView):
-    model = Profile
-    fields = ['username', 'first_name', 'last_name', 'email', 'date_of_birth', 'photo']
-    template_name = 'profile_edit.html'
-    # pk_url_kwarg = 'id'
-    success_url = reverse_lazy('profile')
-
-
-# class CustomSignupView(SignupView):
-#     form_class = CustomSignupForm
-#     template_name = 'custom_signup.html'
-
-# class CustomSignup(SignupView):
-#     template_name = 'custom_signup.html'
-#     form_class = ProfileForm
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         if 'profile_form' not in context:
-#             context['profile_form'] = self.get_profile_form()
-#         return context
-#
-#     def form_valid(self, form):
-#         user_form = self.get_user_form()
-#         if user_form.is_valid() and form.is_valid():
-#             # Обработка валидных форм
-#             return self.form_valid(form)
-#         else:
-#             # Обработка невалидных форм
-#             return self.form_invalid(form)
-#
-#     def get_profile_form(self):
-#         return Profile.objects.get(user=self.request.user)
-
-
+# Представление для изменения профиля пользователя
 @login_required
 def profile_edit(request):
     user = request.user
     profile = Profile.objects.get(user=user)
 
+    # встраиваем две формы в один шаблон
     if request.method == 'POST':
         user_form = UserForm(request.POST, instance=user)
         profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
+            profile = profile_form.save(commit=False)
+            profile.user = user
             profile_form.save()
             return redirect('profile')
     else:
